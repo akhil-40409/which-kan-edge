@@ -1,0 +1,78 @@
+name: PR Monitor
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          . .venv/bin/activate
+          uv pip install -e ".[dev]"
+
+      - name: Run Black
+        run: |
+          . .venv/bin/activate
+          black --check --config pyproject.toml src experiments tests
+
+      - name: Run isort
+        run: |
+          . .venv/bin/activate
+          isort --check-only --settings-path pyproject.toml src experiments tests
+
+      - name: Run Flake8
+        run: |
+          . .venv/bin/activate
+          flake8 --config .dev-config/.flake8 src experiments tests
+
+      - name: Run pydocstyle
+        run: |
+          . .venv/bin/activate
+          pydocstyle --config .dev-config/.pydocstyle src experiments
+
+      - name: Run mypy
+        run: |
+          . .venv/bin/activate
+          mypy --config-file .dev-config/mypy.ini src experiments
+
+      - name: Run pylint
+        run: |
+          . .venv/bin/activate
+          pylint --rcfile .dev-config/.pylintrc src experiments
+
+      - name: Run pytest
+        run: |
+          . .venv/bin/activate
+          pytest tests/ --cov=src --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage reports
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
