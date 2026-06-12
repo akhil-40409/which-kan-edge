@@ -1,4 +1,4 @@
-# Eigenflow
+# eigenflow
 
 A clean, minimalist, JAX-accelerated library for classical and quantum machine learning models, specifically tailored for symbolic regression benchmarks. It contains pure JAX implementations of Multi-Layer Perceptrons (MLPs), B-spline Kolmogorov-Arnold Networks (KANs), and Quantum KANs (QKANs). Everything is 100% JIT-compilable, differentiable, and vectorized.
 
