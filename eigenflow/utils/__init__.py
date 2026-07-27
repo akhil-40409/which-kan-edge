@@ -1,3 +1,9 @@
-from eigenflow.utils.plotting import plot_regression_results, plot_loss_comparison
+from eigenflow.utils.metrics import count_params, rmse
+from eigenflow.utils.plotting import plot_loss_comparison, plot_regression_results
 
-__all__ = ["plot_regression_results", "plot_loss_comparison"]
+__all__ = [
+    "count_params",
+    "rmse",
+    "plot_regression_results",
+    "plot_loss_comparison",
+]

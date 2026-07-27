@@ -1,32 +1,28 @@
-# JAX-accelerated MLP Layer
+"""JAX multi-layer perceptron (classical baseline)."""
+
+from __future__ import annotations
+
+from functools import partial
+from typing import Callable, List, Sequence, Tuple, Union
 
 import jax
 import jax.numpy as jnp
-from typing import List, Tuple, Callable, Union
-from functools import partial
 
 
 def init_mlp_params(
-    rng: jax.random.PRNGKey,
-    layer_sizes: Union[List[int], Tuple[int, ...]]
+    rng: jax.Array,
+    layer_sizes: Union[Sequence[int], Tuple[int, ...]],
 ) -> List[Tuple[jax.Array, jax.Array]]:
-    """Initializes Multi-Layer Perceptron parameters with Xavier/Glorot uniform initialization.
-
-    Args:
-        rng: JAX random number generator key.
-        layer_sizes: List or tuple of integers specifying the sizes of the layers
-                     (including inputs and outputs).
-
-    Returns:
-        A list of tuples (w, b) for each layer.
-    """
+    """Xavier/Glorot-uniform weights and zero biases."""
     keys = jax.random.split(rng, len(layer_sizes) - 1)
-    params = []
+    params: List[Tuple[jax.Array, jax.Array]] = []
     for i in range(len(layer_sizes) - 1):
         in_dim = layer_sizes[i]
         out_dim = layer_sizes[i + 1]
         lim = jnp.sqrt(6.0 / (in_dim + out_dim))
-        w = jax.random.uniform(keys[i], shape=(in_dim, out_dim), minval=-lim, maxval=lim)
+        w = jax.random.uniform(
+            keys[i], shape=(in_dim, out_dim), minval=-lim, maxval=lim
+        )
         b = jnp.zeros((out_dim,))
         params.append((w, b))
     return params
@@ -37,80 +33,44 @@ def forward_mlp(
     params: List[Tuple[jax.Array, jax.Array]],
     X: jax.Array,
     activation_fn: Callable[[jax.Array], jax.Array] = jax.nn.silu,
-    squeeze: bool = True
+    squeeze: bool = True,
 ) -> jax.Array:
-    """Evaluates the MLP on inputs X.
-
-    Args:
-        params: List of parameter tuples (w, b).
-        X: Input array of shape (..., in_features).
-        activation_fn: The activation function to use on hidden layers.
-        squeeze: If True, squeezes the last dimension of the output (useful for 1D targets).
-
-    Returns:
-        The evaluated MLP output.
-    """
-    activation = X
+    """Evaluate an MLP on ``X``."""
+    h = X
     for w, b in params[:-1]:
-        activation = activation_fn(jnp.dot(activation, w) + b)
+        h = activation_fn(jnp.dot(h, w) + b)
     w_last, b_last = params[-1]
-    out = jnp.dot(activation, w_last) + b_last
+    out = jnp.dot(h, w_last) + b_last
     if squeeze:
-        return jnp.squeeze(out)
+        return jnp.squeeze(out, axis=-1) if out.shape[-1] == 1 else jnp.squeeze(out)
     return out
 
 
 class MLP:
-    """A reusable, JAX-accelerated MLP Layer/Network."""
+    """Drop-in JAX MLP: ``params = model.init(key); y = model.apply(params, x)``."""
 
     def __init__(
         self,
         layer_sizes: List[int],
         activation_fn: Callable[[jax.Array], jax.Array] = jax.nn.silu,
-        squeeze: bool = True
+        squeeze: bool = True,
     ):
-        """Initializes the MLP layer definition.
-
-        Args:
-            layer_sizes: List of layer dimensions, e.g. [input_dim, hidden_dim_1, ..., output_dim].
-            activation_fn: JAX activation function for hidden layers.
-            squeeze: Whether to squeeze the output array (e.g. from (batch_size, 1) to (batch_size,)).
-        """
-        self.layer_sizes = layer_sizes
+        self.layer_sizes = list(layer_sizes)
         self.activation_fn = activation_fn
         self.squeeze = squeeze
 
-    def init(self, rng: jax.random.PRNGKey) -> List[Tuple[jax.Array, jax.Array]]:
-        """Initializes parameters for the MLP network.
-
-        Args:
-            rng: JAX random number generator key.
-
-        Returns:
-            A list of parameter tuples (w, b).
-        """
+    def init(self, rng: jax.Array) -> List[Tuple[jax.Array, jax.Array]]:
         return init_mlp_params(rng, self.layer_sizes)
 
     def apply(
         self,
         params: List[Tuple[jax.Array, jax.Array]],
-        X: jax.Array
+        X: jax.Array,
+        *,
+        squeeze: bool | None = None,
     ) -> jax.Array:
-        """Applies the MLP forward pass on the input array X.
+        sq = self.squeeze if squeeze is None else squeeze
+        return forward_mlp(params, X, activation_fn=self.activation_fn, squeeze=sq)
 
-        Args:
-            params: Parameters list of tuples (w, b).
-            X: Input array of shape (batch_size, input_dim).
-
-        Returns:
-            Output array of predictions.
-        """
-        return forward_mlp(params, X, activation_fn=self.activation_fn, squeeze=self.squeeze)
-
-    def __call__(
-        self,
-        params: List[Tuple[jax.Array, jax.Array]],
-        X: jax.Array
-    ) -> jax.Array:
-        """Alias for self.apply."""
-        return self.apply(params, X)
+    def __call__(self, params, X, *, squeeze: bool | None = None):
+        return self.apply(params, X, squeeze=squeeze)

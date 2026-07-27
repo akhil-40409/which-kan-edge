@@ -1,215 +1,137 @@
-# JAX-accelerated QKAN (Quantum Kolmogorov-Arnold Network) Layer
+"""Quantum KAN with variational activation functions (Jiang-style QVAF).
+
+Each KAN edge is a 1-qubit data-reuploading unitary + ⟨Z⟩ (SiLU residual).
+Edges use an exact 2×2 statevector (same gates as the PennyLane circuit in
+``docs/qkan.md``). Multi-qubit QNN keeps live PennyLane; see backends for qjit.
+"""
+
+from __future__ import annotations
+
+from functools import partial
+from typing import List, Sequence, Tuple, Union
 
 import jax
 import jax.numpy as jnp
-import pennylane as qml
-from typing import List, Tuple, Union
-from functools import partial
-
-# Initialize the PennyLane device using JAX-compatible backend
-dev = qml.device("default.qubit", wires=1)
 
 
-@qml.qnode(dev, interface="jax")
-def _qvaf_circuit(x: float, weights: jax.Array) -> jax.Array:
-    """A 1-qubit variational circuit acting as an activation function on an edge.
-
-    Args:
-        x: A scalar input value.
-        weights: Parameters of shape (num_layers, 3).
-
-    Returns:
-        The expectation value of PauliZ operator.
-    """
-    num_layers = weights.shape[0]
-    for l in range(num_layers):
-        # RY gate: encodes input x scaled/shifted
-        qml.RY(weights[l, 0] * x + weights[l, 1], wires=0)
-        # RZ gate: learnable rotation
-        qml.RZ(weights[l, 2], wires=0)
-    return qml.expval(qml.PauliZ(0))
+def _ry(theta: jax.Array) -> jax.Array:
+    c, s = jnp.cos(theta / 2), jnp.sin(theta / 2)
+    return jnp.array([[c, -s], [s, c]], dtype=theta.dtype)
 
 
-# Vectorize _qvaf_circuit over:
-# 1. Batch axis of X (axis 0)
-_qvaf_batch = jax.vmap(_qvaf_circuit, in_axes=(0, None))
+def _rz(theta: jax.Array) -> jax.Array:
+    e0 = jnp.exp(-1j * theta / 2)
+    e1 = jnp.exp(1j * theta / 2)
+    return jnp.diag(jnp.stack([e0, e1]))
 
-# 2. Input features axis of weights (axis 0) and columns of X (axis 1)
+
+def qvaf_expval(x: jax.Array, weights: jax.Array) -> jax.Array:
+    """⟨Z⟩ for RY(w0*x+w1), RZ(w2) re-uploads. weights: (n_reps, 3)."""
+    state = jnp.array([1.0 + 0j, 0.0 + 0j], dtype=jnp.complex64)
+
+    def body(i, s):
+        w = weights[i]
+        theta = w[0] * x + w[1]
+        s = _ry(theta).astype(jnp.complex64) @ s
+        s = _rz(w[2]).astype(jnp.complex64) @ s
+        return s
+
+    state = jax.lax.fori_loop(0, weights.shape[0], body, state)
+    return jnp.real(jnp.abs(state[0]) ** 2 - jnp.abs(state[1]) ** 2)
+
+
+# Vectorize over batch, in-features, out-features
+_qvaf_batch = jax.vmap(qvaf_expval, in_axes=(0, None))
 _qvaf_in = jax.vmap(_qvaf_batch, in_axes=(1, 0))
-
-# 3. Output features axis of weights (axis 1)
 _qvaf_out = jax.vmap(_qvaf_in, in_axes=(None, 1))
 
 
 def init_qkan_params(
-    key: jax.random.PRNGKey,
+    key: jax.Array,
     in_features: int,
     out_features: int,
-    num_layers: int
+    num_layers: int,
 ) -> Tuple[jax.Array, jax.Array]:
-    """Initializes base weights and quantum weights for a single QKAN layer.
-
-    Args:
-        key: JAX random key.
-        in_features: Number of input dimensions.
-        out_features: Number of output dimensions.
-        num_layers: Number of quantum circuit layers.
-
-    Returns:
-        w_base: Residual linear weights of shape (in_features, out_features)
-        w_quantum: Quantum circuit parameters of shape (in_features, out_features, num_layers, 3)
-    """
     k1, k2 = jax.random.split(key)
-
-    # Base residual weights
     limit = jnp.sqrt(6.0 / (in_features + out_features))
-    w_base = jax.random.uniform(k1, shape=(in_features, out_features), minval=-limit, maxval=limit)
-
-    # Quantum weights initialized to small random values
-    w_quantum = jax.random.normal(k2, shape=(in_features, out_features, num_layers, 3)) * 0.1
-
+    w_base = jax.random.uniform(
+        k1, shape=(in_features, out_features), minval=-limit, maxval=limit
+    )
+    w_quantum = (
+        jax.random.normal(k2, shape=(in_features, out_features, num_layers, 3)) * 0.1
+    )
     return w_base, w_quantum
 
 
 def init_qkan_network_params(
-    key: jax.random.PRNGKey,
-    layer_sizes: Union[List[int], Tuple[int, ...]],
-    num_layers: int
+    key: jax.Array,
+    layer_sizes: Union[Sequence[int], Tuple[int, ...]],
+    num_layers: int,
 ) -> List[Tuple[jax.Array, jax.Array]]:
-    """Initializes parameters for a multi-layer QKAN.
-
-    Args:
-        key: JAX random key.
-        layer_sizes: List of layer dimensions.
-        num_layers: Number of quantum circuit layers.
-
-    Returns:
-        A list of parameter tuples (w_base, w_quantum) per layer.
-    """
     keys = jax.random.split(key, len(layer_sizes) - 1)
-    network_params = []
-    for i in range(len(layer_sizes) - 1):
-        params = init_qkan_params(keys[i], layer_sizes[i], layer_sizes[i + 1], num_layers)
-        network_params.append(params)
-    return network_params
+    return [
+        init_qkan_params(keys[i], layer_sizes[i], layer_sizes[i + 1], num_layers)
+        for i in range(len(layer_sizes) - 1)
+    ]
 
 
-@partial(jax.jit, static_argnums=(2,))
-def qkan_layer(
-    x: jax.Array,
-    params: Tuple[jax.Array, jax.Array],
-    num_layers: int
-) -> jax.Array:
-    """Evaluates a single QKAN layer on input x.
-
-    Args:
-        x: Input array of shape (..., in_features).
-        params: Tuple (w_base, w_quantum).
-        num_layers: Number of quantum circuit layers.
-
-    Returns:
-        Layer output of shape (..., out_features).
-    """
+@partial(jax.jit, static_argnames=())
+def qkan_layer(x: jax.Array, params: Tuple[jax.Array, jax.Array]) -> jax.Array:
     w_base, w_quantum = params
-
     has_batch = x.ndim > 1
-    if not has_batch:
-        x_batched = jnp.expand_dims(x, axis=0)
-    else:
-        x_batched = x
-
-    # 1. Base residual: SiLU + linear weights
+    x_batched = x if has_batch else jnp.expand_dims(x, axis=0)
     base_out = jnp.matmul(jax.nn.silu(x_batched), w_base)
-
-    # 2. Quantum activation functions on the edges
-    # Output shape from vmap: (out_features, in_features, batch_size)
-    q_out_raw = _qvaf_out(x_batched, w_quantum)
-
-    # Transpose to (batch_size, in_features, out_features)
+    q_out_raw = _qvaf_out(x_batched, w_quantum)  # (out, in, batch)
     q_edges = jnp.transpose(q_out_raw, (2, 1, 0))
-
-    # Sum along in_features dimension to get node activations
     q_nodes = jnp.sum(q_edges, axis=1)
-
     out = base_out + q_nodes
-
     if not has_batch:
         out = jnp.squeeze(out, axis=0)
     return out
 
 
-@partial(jax.jit, static_argnums=(2,))
-def qkan_network(
-    x: jax.Array,
-    network_params: List[Tuple[jax.Array, jax.Array]],
-    num_layers: int
-) -> jax.Array:
-    """Evaluates a multi-layer QKAN.
-
-    Args:
-        x: Input array of shape (..., in_features).
-        network_params: List of layer parameters.
-        num_layers: Number of quantum layers.
-
-    Returns:
-        Network predictions.
-    """
-    h = x
-    for params in network_params:
-        h = qkan_layer(h, params, num_layers)
-    return h
-
-
 class QKAN:
-    """A reusable, JAX-accelerated Quantum Kolmogorov-Arnold Network (QKAN) using PennyLane."""
+    """QVAF-edge KAN. ``params = model.init(key); y = model.apply(params, x)``.
 
-    def __init__(self, layer_sizes: List[int], num_layers: int = 2):
-        """Initializes the QKAN definition.
+    ``device`` / ``qjit`` are accepted for API parity with QNN; 1-qubit edges
+    use an exact JAX statevector (PennyLane-equivalent gates).
+    """
 
-        Args:
-            layer_sizes: List of layer dimensions, e.g. [input_dim, hidden_dim_1, ..., output_dim].
-            num_layers: Number of quantum data re-uploading layers.
-        """
-        self.layer_sizes = layer_sizes
-        self.num_layers = num_layers
+    def __init__(
+        self,
+        layer_sizes: List[int],
+        n_reps: int = 2,
+        device: str = "default.qubit",
+        qjit: bool = False,
+        squeeze: bool = True,
+    ):
+        self.layer_sizes = list(layer_sizes)
+        self.n_reps = n_reps
+        self.num_layers = n_reps
+        self.device = device
+        self.qjit = qjit
+        self.squeeze = squeeze
+        if qjit:
+            # Documented no-op for edge sims; QNN uses real Catalyst.
+            pass
 
-    def init(self, rng: jax.random.PRNGKey) -> List[Tuple[jax.Array, jax.Array]]:
-        """Initializes parameters for the QKAN network.
-
-        Args:
-            rng: JAX random number generator key.
-
-        Returns:
-            A list of parameter tuples (w_base, w_quantum) for each layer.
-        """
-        return init_qkan_network_params(rng, self.layer_sizes, self.num_layers)
+    def init(self, rng: jax.Array) -> List[Tuple[jax.Array, jax.Array]]:
+        return init_qkan_network_params(rng, self.layer_sizes, self.n_reps)
 
     def apply(
         self,
         params: List[Tuple[jax.Array, jax.Array]],
         X: jax.Array,
-        squeeze: bool = True
+        *,
+        squeeze: bool | None = None,
     ) -> jax.Array:
-        """Applies the QKAN forward pass on the input array X.
+        h = X
+        for layer_params in params:
+            h = qkan_layer(h, layer_params)
+        sq = self.squeeze if squeeze is None else squeeze
+        if sq:
+            return jnp.squeeze(h, axis=-1) if h.shape[-1] == 1 else jnp.squeeze(h)
+        return h
 
-        Args:
-            params: Parameters list of tuples (w_base, w_quantum).
-            X: Input array of shape (batch_size, input_dim).
-            squeeze: If True, squeezes the last dimension of the output.
-
-        Returns:
-            Predictions array.
-        """
-        preds = qkan_network(X, params, self.num_layers)
-        if squeeze:
-            return jnp.squeeze(preds)
-        return preds
-
-    def __call__(
-        self,
-        params: List[Tuple[jax.Array, jax.Array]],
-        X: jax.Array,
-        squeeze: bool = True
-    ) -> jax.Array:
-        """Alias for self.apply."""
-        return self.apply(params, X, squeeze)
+    def __call__(self, params, X, *, squeeze: bool | None = None):
+        return self.apply(params, X, squeeze=squeeze)

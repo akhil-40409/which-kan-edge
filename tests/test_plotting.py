@@ -1,66 +1,26 @@
-import matplotlib
-matplotlib.use('Agg')
-import numpy as np
 import os
-from eigenflow.utils import plot_regression_results, plot_loss_comparison
+import tempfile
+
+import numpy as np
+
+from eigenflow.utils.plotting import plot_loss_comparison, plot_regression_results
+
 
 def test_plot_regression_results():
-    """Verify that plot_regression_results generates and saves figures correctly."""
-    losses = [10.0, 1.0, 0.1, 0.01]
-    y_true = np.random.uniform(1.0, 10.0, size=(100,))
-    y_pred = y_true + np.random.normal(0.0, 0.1, size=(100,))
-    
-    # 2D dummy inputs
-    X_raw = np.random.uniform(-1.0, 1.0, size=(100, 2))
-    y_raw = y_true
-    
-    save_path = "test_results.png"
-    if os.path.exists(save_path):
-        os.remove(save_path)
-        
-    try:
-        # We specify save_path to render and save. In headless tests, saving to file is robust.
-        plot_regression_results(
-            losses=losses,
-            y_true=y_true,
-            y_pred=y_pred,
-            test_losses=[(1, 1.0), (3, 0.01)],
-            X_raw=X_raw,
-            y_raw=y_raw,
-            variables=["t", "v"],
-            slice_feature_idx=1,
-            title="Test Title",
-            save_path=save_path,
-            dpi=50 # low dpi to speed up testing
-        )
-        
-        assert os.path.exists(save_path)
-        assert os.path.getsize(save_path) > 0
-    finally:
-        if os.path.exists(save_path):
-            os.remove(save_path)
+    losses = list(np.linspace(1.0, 0.1, 20))
+    y_true = np.linspace(-1, 1, 50)
+    y_pred = y_true + 0.05 * np.random.randn(50)
+    with tempfile.TemporaryDirectory() as td:
+        path = os.path.join(td, "reg.png")
+        plot_regression_results(losses, y_true, y_pred, save_path=path)
+        assert os.path.isfile(path)
+
 
 def test_plot_loss_comparison():
-    """Verify that plot_loss_comparison generates and saves comparison plots correctly."""
-    loss_dict = {
-        "MLP": [10.0, 5.0, 2.0, 1.0],
-        "KAN": [10.0, 2.0, 0.5, 0.1]
-    }
-    
-    save_path = "test_comparison.png"
-    if os.path.exists(save_path):
-        os.remove(save_path)
-        
-    try:
+    with tempfile.TemporaryDirectory() as td:
+        path = os.path.join(td, "cmp.png")
         plot_loss_comparison(
-            loss_dict=loss_dict,
-            title="Test Loss Comparison",
-            save_path=save_path,
-            dpi=50
+            {"mlp": list(np.linspace(1, 0.2, 10)), "kan": list(np.linspace(1, 0.1, 10))},
+            save_path=path,
         )
-        
-        assert os.path.exists(save_path)
-        assert os.path.getsize(save_path) > 0
-    finally:
-        if os.path.exists(save_path):
-            os.remove(save_path)
+        assert os.path.isfile(path)

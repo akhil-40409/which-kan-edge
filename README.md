@@ -1,49 +1,63 @@
-# eigenflow
+# Eigenflow
 
-A clean, minimalist, JAX-accelerated library for classical and quantum machine learning models, specifically tailored for symbolic regression benchmarks. It contains pure JAX implementations of Multi-Layer Perceptrons (MLPs), B-spline Kolmogorov-Arnold Networks (KANs), and Quantum KANs (QKANs). Everything is 100% JIT-compilable, differentiable, and vectorized.
+Drop-in **PennyLane + JAX** layers for classical and quantum ML, aimed at scientific function approximation.
 
-## Directory Structure
+Models: **MLP**, **B-spline KAN**, **data-reuploading QNN**, **QKAN** (variational-activation edges), **QuIRK**.
 
-* `eigenflow/`: Core library package.
-  * `layers/`: Drop-in, compilable model layers.
-    * `mlp.py`: Multi-Layer Perceptron using Xavier/Glorot uniform initialization and SiLU activations.
-    * `kan.py`: Classical Kolmogorov-Arnold Network using B-splines of arbitrary order (Cox-de Boor recurrence relation) and tensor contractions via `jnp.einsum`.
-    * `qkan.py`: Quantum Kolmogorov-Arnold Network using PennyLane. Replaces splines with 1-qubit variational data re-uploading circuits parallelized via nested `jax.vmap`.
-  * `datasets/`: Vectorized AI Feynman database generators.
-  * `utils/`: Plotting and evaluation helpers.
-* `experiments/`: Benchmark notebooks and training scripts.
-  * `compare_mlp_kan.ipynb`: Side-by-side training comparison of MLP vs KAN.
-* `tests/`: Pytest suite verifying shapes, compilation, and gradients.
+We do **not** claim quantum advantage. Quantum models here are differentiable simulators for research and teaching.
 
-## Quick Start
-
-### 1. Run Tests
-Verify the installation by running the unit test suite:
-```bash
-.venv/bin/pytest
-```
-This runs assertions across all three model architectures to ensure shapes, JIT compilation, and parameter gradients are correct.
-
-### 2. Run Experiments
-Train the models on the Relativistic Time Dilation equation ($t' = \frac{t}{\sqrt{1 - v^2/c^2}}$):
+## Install
 
 ```bash
-# Train MLP
-.venv/bin/python experiments/MLPs/mlp_experiment.py
-
-# Train KAN
-.venv/bin/python experiments/KANs/kan_experiment.py
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+# optional compiled hybrid path:
+pip install -e ".[catalyst]"
 ```
-Or open and execute `experiments/compare_mlp_kan.ipynb` to compare convergence and JIT overhead side-by-side.
 
-## Verification and Ground Truth
+## 30-second train
 
-Because we benchmark on physical equations, we establish correctness by directly verifying predicted outputs against the analytical closed-form equations (e.g. $t' = \frac{t}{\sqrt{1 - v^2/c^2}}$). We also assert convergence parity against the original prototype notebooks (~0.002 train loss for MLP, ~0.0009 train loss for KAN).
+```python
+import jax
+from eigenflow import MLP
+from eigenflow.datasets import make_dataset
+from eigenflow.training import train_model
+
+key = jax.random.PRNGKey(0)
+k1, k2 = jax.random.split(key)
+data = make_dataset("I.15.3t", k1, n_samples=1000)  # relativistic time dilation
+model = MLP([data["n_features"], 32, 32, 1])
+out = train_model(model, data, k2, steps=500)
+print(out["test_rmse"], out["n_params"])
+```
+
+Swap `MLP` for `SplineKAN`, `QNN`, `QKAN`, or `QuIRK` (see [`docs/`](docs/)).
+
+## How to read the code
+
+1. [`docs/stack.md`](docs/stack.md) — PennyLane vs JAX vs Catalyst (the stack layers).
+2. One paradigm page under `docs/` — math → circuit → code pointer.
+3. [`eigenflow/layers/`](eigenflow/layers/) — the actual implementations.
+4. [`experiments/run_benchmark.py`](experiments/run_benchmark.py) — one-command suite.
+
+```bash
+python experiments/run_benchmark.py --quick
+pytest -q --no-cov
+```
+
+## Layout
+
+```text
+eigenflow/
+  layers/      # mlp, spline_kan, qnn, qkan, quirk
+  backends/    # device + QNode factory, optional qjit
+  datasets/    # AI Feynman + special functions
+  training/    # shared Adam loop
+docs/          # Karpathy-style notes + references
+experiments/   # run_benchmark.py
+tests/
+```
 
 ## References
 
-* **KAN**: Liu et al., *KAN: Kolmogorov-Arnold Networks* (2024). [arXiv:2404.19756](https://arxiv.org/abs/2404.19756)
-* **AI Feynman**: Udrescu & Tegmark, *AI Feynman: A Physics-Inspired Systematic Symbolic Regression Framework* (2019). [arXiv:1905.11481](https://arxiv.org/abs/1905.11481)
-* **QKAN (Taiwan)**: Jiang et al., *Quantum Variational Activation Functions Empower Kolmogorov-Arnold Networks* (2025). [arXiv:2509.14026](https://arxiv.org/abs/2509.14026)
-* **MLP**: Rumelhart et al., *Learning representations by back-propagating errors* (1986). [Nature](https://www.nature.com/articles/323533a0)
-
+See [`docs/references.md`](docs/references.md).

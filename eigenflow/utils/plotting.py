@@ -1,3 +1,6 @@
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import List, Tuple, Optional, Union, Dict
@@ -129,7 +132,8 @@ def plot_regression_results(
     if save_path:
         plt.savefig(save_path, bbox_inches='tight', dpi=dpi)
         print(f"Results plot saved to {save_path}")
-    plt.show()
+    plt.close(fig)
+
 
 def plot_loss_comparison(
     loss_dict: Dict[str, Union[List[float], np.ndarray]],
@@ -166,4 +170,4 @@ def plot_loss_comparison(
     if save_path:
         plt.savefig(save_path, bbox_inches='tight', dpi=dpi)
         print(f"Loss comparison plot saved to {save_path}")
-    plt.show()
+    plt.close()

@@ -392,3 +392,31 @@ class FeynmanDatasetGenerator:
             }
             for eq in FEYNMAN_EQUATIONS.values()
         ]
+
+    def generate_splits(
+        self,
+        key: jax.random.PRNGKey,
+        num_samples: int,
+        *,
+        train_frac: float = 0.7,
+        val_frac: float = 0.15,
+        noise_level: float = 0.0,
+        noise_type: str = "none",
+        input_scaling: str = "minmax_11",
+        target_scaling: str = "standardize",
+    ) -> Dict[str, jax.Array]:
+        """Generate data and return a shuffled train/val/test dict."""
+        from eigenflow.datasets import train_val_test_split
+
+        k_data, k_split = jax.random.split(key)
+        X, y, _ = self.generate(
+            k_data,
+            num_samples,
+            noise_level=noise_level,
+            noise_type=noise_type,
+            input_scaling=input_scaling,
+            target_scaling=target_scaling,
+        )
+        return train_val_test_split(
+            X, y, k_split, train_frac=train_frac, val_frac=val_frac
+        )

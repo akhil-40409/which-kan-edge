@@ -138,6 +138,9 @@ experiments/outputs/
 experiments/logs/
 wandb/
 mlruns/
+results/*.csv
+results/*.json
+!results/README.md
 
 # Hydra
 outputs/
