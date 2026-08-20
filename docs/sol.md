@@ -26,7 +26,7 @@ On Sol Shell Access (portal) or SSH (`ssh ASURITE@sol.asu.edu`):
 
 ```bash
 cd ~/   # or your scratch project dir
-git clone https://github.com/akhil-40409/eigenflow.git
+git clone https://github.com/akhil-40409/which-kan-edge.git
 cd eigenflow
 ```
 
