@@ -64,6 +64,7 @@ eigenflow/
   training/    # shared Adam loop
 docs/          # claim + Karpathy-style notes + references
 experiments/   # run_benchmark.py
+paper/         # arXiv note skeleton (title, abstract, headings, bib)
 tests/
 ```
 
