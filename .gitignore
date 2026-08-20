@@ -140,9 +140,21 @@ wandb/
 mlruns/
 results/*.csv
 results/*.json
+results/shards/
 !results/README.md
 
 # Hydra
 outputs/
 multirun/
 .hydra/
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.synctex.gz
+paper/missfont.log
+paper/main.pdf

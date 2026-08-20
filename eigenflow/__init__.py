@@ -1,9 +1,9 @@
 """Eigenflow: PennyLane + JAX drop-in layers for classical and quantum ML."""
 
 from eigenflow import datasets, layers, training, utils
-from eigenflow.layers import MLP, QKAN, QNN, QuIRK, SplineKAN, make_model
+from eigenflow.layers import FourierKAN, MLP, QKAN, QNN, QuIRK, SplineKAN, make_model
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = [
     "datasets",
     "layers",
@@ -11,6 +11,7 @@ __all__ = [
     "utils",
     "MLP",
     "SplineKAN",
+    "FourierKAN",
     "QNN",
     "QKAN",
     "QuIRK",

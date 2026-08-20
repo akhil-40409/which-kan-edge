@@ -1,7 +1,5 @@
 # The stack: PennyLane + JAX + Catalyst
 
-These are **three layers of one stack**, not three competing backends.
-
 ```text
 Optax training loop
         │
@@ -19,12 +17,14 @@ Optax training loop
 
 ## What each piece does
 
-| Layer | Job | Always on? |
-|-------|-----|------------|
-| **PennyLane** | Write / specify gates; live QNodes for multi-qubit QNN | QNN (required); QKAN/QuIRK use equivalent JAX 2×2 |
-| **JAX** | Arrays + autodiff into Optax (`interface="jax"` on QNodes) | Yes |
-| **Device** | Where a live QNode’s statevector lives | QNN |
-| **Catalyst `@qjit`** | Compile hybrid quantum+classical hot path | Optional (QNN) |
+
+| Layer                | Job                                                        | Always on?                                        |
+| -------------------- | ---------------------------------------------------------- | ------------------------------------------------- |
+| **PennyLane**        | Write / specify gates; live QNodes for multi-qubit QNN     | QNN (required); QKAN/QuIRK use equivalent JAX 2×2 |
+| **JAX**              | Arrays + autodiff into Optax (`interface="jax"` on QNodes) | Yes                                               |
+| **Device**           | Where a live QNode’s statevector lives                     | QNN                                               |
+| **Catalyst** `@qjit` | Compile hybrid quantum+classical hot path                  | Optional (QNN)                                    |
+
 
 In eigenflow:
 
@@ -46,14 +46,7 @@ Flipping `device=` / `qjit=` on **QNN** does **not** change the circuit math —
 ## When to use eager vs `@qjit`
 
 - **Eager (default):** debugging, teaching, `default.qubit`, most QNN experiments.
-- **`qjit=True`:** hot multi-qubit QNN loops on Lightning when Python overhead shows up in profiles.
-
-## Is this “industry standard”?
-
-- **Inside the PennyLane / Xanadu ecosystem:** yes — JAX + Lightning + Catalyst is the high-performance hybrid path they recommend.
-- **Across QML industry:** one of several standards. You will also see PennyLane+PyTorch, Qiskit Runtime, and NVIDIA CUDA-Q. We pick PennyLane+JAX so quantum layers share one array/grad story with classical MLP / B-spline KAN.
-
-Catalyst is **not** required to say “PennyLane + JAX”. Many papers never use `@qjit`.
+- `qjit=True`**:** hot multi-qubit QNN loops on Lightning when Python overhead shows up in profiles.
 
 ## Implementation note
 
@@ -69,5 +62,4 @@ PennyLane).
 2. Inside `@qjit`, prefer Catalyst transforms (`catalyst.grad`, …) for quantum-aware grads.
 3. Install Catalyst via `pip install 'eigenflow[catalyst]'`.
 
-Code: [`eigenflow/backends/qnode.py`](../eigenflow/backends/qnode.py).
-
+Code: `[eigenflow/backends/qnode.py](../eigenflow/backends/qnode.py)`.

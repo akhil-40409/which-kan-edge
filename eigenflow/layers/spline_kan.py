@@ -175,6 +175,13 @@ class SplineKAN:
     def __call__(self, state, X, *, squeeze: bool | None = None):
         return self.apply(state, X, squeeze=squeeze)
 
+    def count_trainable_params(self, state: SplineKANState) -> int:
+        """Exclude frozen knot grids from the parameter count."""
+        from eigenflow.utils.metrics import count_params
+
+        params, _grids = state
+        return count_params(params)
+
 
 # Back-compat alias
 KAN = SplineKAN
