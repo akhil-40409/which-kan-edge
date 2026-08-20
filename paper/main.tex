@@ -1,0 +1,55 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\title{Which KAN Edge?\\
+  \large Spline vs.\ Fourier vs.\ One-Qubit Variational Activations}
+\author{
+  Akhil Anand\\
+  Arizona State University\\
+  \texttt{aanan102@asu.edu}
+}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Kolmogorov--Arnold Networks place a learnable univariate function on every
+edge~\citep{liu2024kan}. Prior fair comparisons find this design most
+competitive on scientific formula-fitting, not as a general MLP
+replacement~\citep{yu2024fairer}. We ask a narrower question: \emph{within
+that regime, which edge basis is best?} We compare B-spline KANs, Fourier
+KANs~\citep{xu2024fourierkan,mehrabian2024fourierkan}, and QKANs whose edge
+nonlinearity is a one-qubit data-reuploading circuit with $\langle Z\rangle$
+readout~\citep{jiang2025qkan,perezsalinas2020reuploading}. All three share the
+same SiLU residual; an MLP is a sideline
+reference~\citep{rumelhart1986backprop}. Models are trained in
+JAX~\citep{eigenflow2026} on AI Feynman equations and special
+functions~\citep{udrescu2019aifeynman} at label noise $0$ and $0.1$. We
+report test RMSE against trainable parameter count, analytic forward FLOPs,
+and wall-clock time. QKAN edges are exact $2\times 2$ statevector simulations,
+not hardware; we do not claim quantum advantage.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+\section{Experimental Setup}
+\label{sec:setup}
+
+\section{Results}
+\label{sec:results}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

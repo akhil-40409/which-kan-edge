@@ -1,5 +1,12 @@
 """Drop-in classical and quantum layers for eigenflow."""
 
+from eigenflow.layers.fourier_kan import (
+    FourierKAN,
+    fourier_kan_layer,
+    fourier_kan_network,
+    init_fourier_kan_params,
+    init_fourier_kan_state,
+)
 from eigenflow.layers.mlp import MLP, forward_mlp, init_mlp_params
 from eigenflow.layers.qkan import QKAN, init_qkan_network_params, init_qkan_params
 from eigenflow.layers.qnn import QNN
@@ -16,12 +23,14 @@ from eigenflow.layers.spline_kan import (
 
 
 def make_model(name: str, **kwargs):
-    """Factory: ``mlp`` | ``spline`` | ``kan`` | ``qnn`` | ``qkan`` | ``quirk``."""
+    """Factory: ``mlp`` | ``spline`` | ``fourier`` | ``qnn`` | ``qkan`` | ``quirk``."""
     key = name.lower()
     if key == "mlp":
         return MLP(**kwargs)
     if key in ("spline", "kan", "spline_kan"):
         return SplineKAN(**kwargs)
+    if key in ("fourier", "fourier_kan", "fkan"):
+        return FourierKAN(**kwargs)
     if key == "qnn":
         return QNN(**kwargs)
     if key == "qkan":
@@ -42,6 +51,11 @@ __all__ = [
     "init_spline_kan_state",
     "kan_layer",
     "kan_network",
+    "FourierKAN",
+    "init_fourier_kan_params",
+    "init_fourier_kan_state",
+    "fourier_kan_layer",
+    "fourier_kan_network",
     "QNN",
     "QKAN",
     "init_qkan_params",

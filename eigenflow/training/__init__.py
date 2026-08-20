@@ -9,7 +9,8 @@ import jax
 import jax.numpy as jnp
 import optax
 
-from eigenflow.utils.metrics import count_params, rmse
+from eigenflow.utils.flops import estimate_flops, trainable_param_count
+from eigenflow.utils.metrics import rmse
 
 
 def train_model(
@@ -28,7 +29,11 @@ def train_model(
     with ``x_train,y_train,x_val,y_val,x_test,y_test``.
     """
     state = model.init(key)
-    n_params = count_params(state)
+    n_params = trainable_param_count(model, state)
+    try:
+        flops = estimate_flops(model)
+    except TypeError:
+        flops = -1
 
     optimizer = optax.adam(lr)
     opt_state = optimizer.init(state)
@@ -86,6 +91,7 @@ def train_model(
     return {
         "state": best_state,
         "n_params": n_params,
+        "flops": flops,
         "val_rmse": val,
         "test_rmse": test,
         "train_time_s": train_time,

@@ -19,8 +19,10 @@ def test_train_mlp_decreases_and_returns_keys(key):
     assert "test_rmse" in out
     assert "val_rmse" in out
     assert "n_params" in out
+    assert "flops" in out
     assert "state" in out
     assert out["n_params"] > 0
+    assert out["flops"] > 0
     pred1 = model.apply(out["state"], data["x_train"])
     loss1 = float(jnp.mean((pred1 - data["y_train"]) ** 2))
     assert loss1 < loss0

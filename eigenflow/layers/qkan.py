@@ -118,6 +118,11 @@ class QKAN:
     def init(self, rng: jax.Array) -> List[Tuple[jax.Array, jax.Array]]:
         return init_qkan_network_params(rng, self.layer_sizes, self.n_reps)
 
+    def count_trainable_params(self, state: List[Tuple[jax.Array, jax.Array]]) -> int:
+        from eigenflow.utils.metrics import count_params
+
+        return count_params(state)
+
     def apply(
         self,
         params: List[Tuple[jax.Array, jax.Array]],
