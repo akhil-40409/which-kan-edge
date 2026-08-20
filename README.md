@@ -1,70 +1,72 @@
-# Eigenflow
+# Which KAN Edge?
 
-Drop-in **PennyLane + JAX** layers for classical and quantum ML, aimed at scientific function approximation.
+Code and draft for a short arXiv note: **SplineKAN vs FourierKAN vs QKAN** on scientific formula-fitting.
 
-Models: **MLP**, **B-spline KAN**, **FourierKAN**, **data-reuploading QNN**, **QKAN** (variational-activation edges), **QuIRK**.
+In the regime where KANs are competitive with MLPs under matched `#params` and FLOPs, which univariate edge is best: B-spline, Fourier, or a one-qubit variational \(\langle Z\rangle\) activation?
 
-We do **not** claim quantum advantage. Quantum models here are differentiable simulators for research and teaching.
+QKAN edges are exact \(2\times 2\) JAX statevector simulations, not hardware. We do **not** claim quantum advantage.
 
-**Preprint target (2026-08-18):** fair SplineKAN vs FourierKAN vs QKAN on AI Feynman + specials — see [`docs/paper_claim.md`](docs/paper_claim.md).
+Paper skeleton: [`paper/main.tex`](paper/main.tex). Protocol: [`docs/paper_claim.md`](docs/paper_claim.md).
+
+The Python package is still `eigenflow` (`pip install -e .` → `from eigenflow import SplineKAN`).
+
+## Branches
+
+| Branch | Contents |
+|--------|----------|
+| `main` | Library only (no paper draft or fair/paper suites) |
+| `paper/kan-fourier-qkan` | This work: FourierKAN, FLOPs, Sol jobs, paper skeleton |
 
 ## Install
 
 ```bash
+git clone https://github.com/akhil-40409/which-kan-edge.git
+cd which-kan-edge
+git checkout paper/kan-fourier-qkan
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-# optional compiled hybrid path:
-pip install -e ".[catalyst]"
 ```
 
 ## 30-second train
 
 ```python
 import jax
-from eigenflow import MLP
+from eigenflow import SplineKAN
 from eigenflow.datasets import make_dataset
 from eigenflow.training import train_model
 
 key = jax.random.PRNGKey(0)
 k1, k2 = jax.random.split(key)
-data = make_dataset("I.15.3t", k1, n_samples=1000)  # relativistic time dilation
-model = MLP([data["n_features"], 32, 32, 1])
+data = make_dataset("I.15.3t", k1, n_samples=1000)
+model = SplineKAN([data["n_features"], 8, 1], grid_size=5)
 out = train_model(model, data, k2, steps=500)
 print(out["test_rmse"], out["n_params"], out["flops"])
 ```
 
-Swap `MLP` for `SplineKAN`, `FourierKAN`, `QNN`, `QKAN`, or `QuIRK` (see [`docs/`](docs/)).
+Swap `SplineKAN` for `FourierKAN`, `QKAN`, or `MLP`. Also in-tree (not in the paper comparison): `QNN`, `QuIRK`. See [`docs/`](docs/).
 
-## How to read the code
-
-1. [`docs/paper_claim.md`](docs/paper_claim.md) — preprint claim + fair/paper suites.
-2. [`docs/stack.md`](docs/stack.md) — PennyLane vs JAX vs Catalyst (the stack layers).
-3. [`docs/sol.md`](docs/sol.md) — ASU Sol overnight CPU/GPU sweeps.
-4. One paradigm page under `docs/` — math → circuit → code pointer.
-5. [`eigenflow/layers/`](eigenflow/layers/) — the actual implementations.
-6. [`experiments/run_benchmark.py`](experiments/run_benchmark.py) — one-command suite.
+## Experiments
 
 ```bash
 python experiments/run_benchmark.py --quick
-# Yu-style arch sweep + noise (envelope plots):
+# Yu-style arch sweep + noise (envelope plots)
 python experiments/run_benchmark.py --suite fair --list-jobs
-# Full-task coarse table + noise:
+# Full-task coarse table — run after picking matched configs from the envelopes
 python experiments/run_benchmark.py --suite paper --list-jobs
-# Sol overnight: Grace Hopper (see docs/sol.md)
+# ASU Sol overnight on Grace Hopper
 GPU=gh200 bash jobs/submit_overnight.sh
 ```
+
+Sol walkthrough: [`docs/sol.md`](docs/sol.md). Merge shards with [`experiments/merge_results.py`](experiments/merge_results.py).
 
 ## Layout
 
 ```text
-eigenflow/
-  layers/      # mlp, spline_kan, fourier_kan, qnn, qkan, quirk
-  backends/    # device + QNode factory, optional qjit
-  datasets/    # AI Feynman + special functions
-  training/    # shared Adam loop
-docs/          # claim + Karpathy-style notes + references
-experiments/   # run_benchmark.py
-paper/         # arXiv note skeleton (title, abstract, headings, bib)
+eigenflow/     # Python package (mlp, spline_kan, fourier_kan, qkan, …)
+docs/          # claim, stack, Sol, per-model notes
+experiments/   # run_benchmark.py, merge_results.py
+jobs/          # Sol CPU / A100 / GH200 arrays
+paper/         # arXiv skeleton (title, abstract, headings, bib)
 tests/
 ```
 
