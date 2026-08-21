@@ -12,10 +12,10 @@ Each edge is a SiLU residual plus a B-spline expansion (Cox–de Boor) on a fixe
 
 ## Code
 
-[`eigenflow/layers/spline_kan.py`](../eigenflow/layers/spline_kan.py)
+[`src/layers/spline_kan.py`](../src/layers/spline_kan.py)
 
 ```python
-from eigenflow import SplineKAN
+from src import SplineKAN
 model = SplineKAN([3, 16, 1], grid_size=5, spline_order=3)
 state = model.init(key)   # (weights, grids)
 y = model.apply(state, x)

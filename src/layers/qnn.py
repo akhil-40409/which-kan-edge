@@ -12,7 +12,7 @@ import jax
 import jax.numpy as jnp
 import pennylane as qml
 
-from eigenflow.backends import make_qnode
+from src.backends import make_qnode
 
 
 def _build_qnn_circuit(n_qubits: int, n_layers: int, n_features: int):

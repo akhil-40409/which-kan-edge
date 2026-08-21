@@ -10,10 +10,10 @@ Modes \(M\) play the role of spline grid resolution \(G\).
 
 ## Code
 
-[`eigenflow/layers/fourier_kan.py`](../eigenflow/layers/fourier_kan.py)
+[`src/layers/fourier_kan.py`](../src/layers/fourier_kan.py)
 
 ```python
-from eigenflow import FourierKAN
+from src import FourierKAN
 model = FourierKAN([3, 16, 1], n_modes=5)
 params = model.init(key)
 y = model.apply(params, x)

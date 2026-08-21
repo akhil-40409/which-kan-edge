@@ -1,4 +1,4 @@
-# Running eigenflow on ASU Sol (first-timer guide)
+# Running which-kan-edge on ASU Sol (first-timer guide)
 
 This walkthrough gets you from zero Sol experience to an **overnight paper-scale**
 CPU + GPU benchmark, then a merged results table.
@@ -27,7 +27,7 @@ On Sol Shell Access (portal) or SSH (`ssh ASURITE@sol.asu.edu`):
 ```bash
 cd ~/   # or your scratch project dir
 git clone https://github.com/akhil-40409/which-kan-edge.git
-cd eigenflow
+cd which-kan-edge
 ```
 
 ## 2. One-time environment (interactive node)

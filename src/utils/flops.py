@@ -1,4 +1,4 @@
-"""Analytic FLOPs-per-sample estimates for eigenflow models.
+"""Analytic FLOPs-per-sample estimates for which-kan-edge models.
 
 Conventions follow Yu et al., *KAN or MLP: A Fairer Comparison* (arXiv:2407.16674):
 arithmetic ops count as 1 FLOP; we report forward pass cost for one sample.
@@ -74,7 +74,7 @@ def flops_qkan(layer_sizes: Sequence[int], n_reps: int) -> int:
 
 
 def estimate_flops(model: Any) -> int:
-    """Dispatch FLOPs estimate from a constructed eigenflow model instance."""
+    """Dispatch FLOPs estimate from a constructed model instance."""
     name = type(model).__name__
     sizes = list(model.layer_sizes)
     if name == "MLP":
@@ -103,7 +103,7 @@ def estimate_flops(model: Any) -> int:
 
 def trainable_param_count(model: Any, state: Any) -> int:
     """Count trainable scalars (excludes frozen SplineKAN grids)."""
-    from eigenflow.utils.metrics import count_params
+    from src.utils.metrics import count_params
 
     if hasattr(model, "count_trainable_params"):
         return int(model.count_trainable_params(state))

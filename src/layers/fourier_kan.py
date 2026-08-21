@@ -1,7 +1,7 @@
 """Fourier Kolmogorov–Arnold Network (pure JAX).
 
 Each edge is a SiLU residual plus a truncated Fourier series (cos/sin modes),
-matching the SplineKAN / QKAN residual layout used in eigenflow.
+matching the SplineKAN / QKAN residual layout used in this repo.
 """
 
 from __future__ import annotations
@@ -122,6 +122,6 @@ class FourierKAN:
         return self.apply(state, X, squeeze=squeeze)
 
     def count_trainable_params(self, state: FourierKANState) -> int:
-        from eigenflow.utils.metrics import count_params
+        from src.utils.metrics import count_params
 
         return count_params(state)

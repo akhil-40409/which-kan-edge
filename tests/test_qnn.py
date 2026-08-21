@@ -1,8 +1,8 @@
 import jax
 import jax.numpy as jnp
 
-from eigenflow.layers import QNN
-from eigenflow.utils import count_params
+from src.layers import QNN
+from src.utils import count_params
 
 
 def test_qnn_shapes_and_gradients(key, batch_key):

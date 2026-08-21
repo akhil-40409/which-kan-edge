@@ -15,10 +15,10 @@ with exact JAX 2×2 matrices (PennyLane-equivalent gates) for speed.
 
 ## Code
 
-[`eigenflow/layers/quirk.py`](../eigenflow/layers/quirk.py)
+[`src/layers/quirk.py`](../src/layers/quirk.py)
 
 ```python
-from eigenflow import QuIRK
+from src import QuIRK
 model = QuIRK([3, 4, 1], n_reps=2, use_dense_head=True)
 params = model.init(key)
 y = model.apply(params, x)

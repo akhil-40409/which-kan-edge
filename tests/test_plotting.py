@@ -3,7 +3,7 @@ import tempfile
 
 import numpy as np
 
-from eigenflow.utils.plotting import plot_loss_comparison, plot_regression_results
+from src.utils.plotting import plot_loss_comparison, plot_regression_results
 
 
 def test_plot_regression_results():

@@ -12,10 +12,10 @@ Stack: PennyLane QNode, `interface="jax"`, optional `qjit=True` (see [`stack.md`
 
 ## Code
 
-[`eigenflow/layers/qnn.py`](../eigenflow/layers/qnn.py)
+[`src/layers/qnn.py`](../src/layers/qnn.py)
 
 ```python
-from eigenflow import QNN
+from src import QNN
 model = QNN(n_features=3, n_qubits=3, n_layers=2, device="default.qubit")
 params = model.init(key)
 y = model.apply(params, x)

@@ -12,10 +12,10 @@ Edges are exact 2×2 JAX statevectors (PennyLane-equivalent; matched in tests).
 
 ## Code
 
-`[eigenflow/layers/qkan.py](../eigenflow/layers/qkan.py)`
+`[src/layers/qkan.py](../src/layers/qkan.py)`
 
 ```python
-from eigenflow import QKAN
+from src import QKAN
 model = QKAN([3, 8, 1], n_reps=2, device="default.qubit", qjit=False)
 params = model.init(key)
 y = model.apply(params, x)

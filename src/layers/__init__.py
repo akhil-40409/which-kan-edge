@@ -1,17 +1,17 @@
-"""Drop-in classical and quantum layers for eigenflow."""
+"""Drop-in classical and quantum layers."""
 
-from eigenflow.layers.fourier_kan import (
+from src.layers.fourier_kan import (
     FourierKAN,
     fourier_kan_layer,
     fourier_kan_network,
     init_fourier_kan_params,
     init_fourier_kan_state,
 )
-from eigenflow.layers.mlp import MLP, forward_mlp, init_mlp_params
-from eigenflow.layers.qkan import QKAN, init_qkan_network_params, init_qkan_params
-from eigenflow.layers.qnn import QNN
-from eigenflow.layers.quirk import QuIRK
-from eigenflow.layers.spline_kan import (
+from src.layers.mlp import MLP, forward_mlp, init_mlp_params
+from src.layers.qkan import QKAN, init_qkan_network_params, init_qkan_params
+from src.layers.qnn import QNN
+from src.layers.quirk import QuIRK
+from src.layers.spline_kan import (
     KAN,
     SplineKAN,
     compute_b_splines,

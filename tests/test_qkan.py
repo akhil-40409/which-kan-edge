@@ -1,14 +1,14 @@
 import jax
 import jax.numpy as jnp
 
-from eigenflow.layers import QKAN
-from eigenflow.utils import count_params
+from src.layers import QKAN
+from src.utils import count_params
 
 
 def test_qvaf_matches_pennylane():
     """Edge ⟨Z⟩ agrees with PennyLane for the documented QVAF circuit."""
     import pennylane as qml
-    from eigenflow.layers.qkan import qvaf_expval
+    from src.layers.qkan import qvaf_expval
 
     weights = jnp.array([[0.2, 0.1, -0.3], [0.05, -0.2, 0.4]], dtype=jnp.float32)
     x = jnp.float32(0.7)

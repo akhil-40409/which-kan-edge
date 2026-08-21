@@ -1,4 +1,4 @@
-from eigenflow.utils.flops import (
+from src.utils.flops import (
     estimate_flops,
     flops_fourier_kan,
     flops_mlp,
@@ -6,8 +6,8 @@ from eigenflow.utils.flops import (
     flops_spline_kan,
     trainable_param_count,
 )
-from eigenflow.utils.metrics import count_params, rmse
-from eigenflow.utils.plotting import plot_loss_comparison, plot_regression_results
+from src.utils.metrics import count_params, rmse
+from src.utils.plotting import plot_loss_comparison, plot_regression_results
 
 __all__ = [
     "count_params",

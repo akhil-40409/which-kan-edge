@@ -8,9 +8,7 @@ QKAN edges are exact \(2\times 2\) JAX statevector simulations, not hardware. We
 
 Paper skeleton: [`paper/main.tex`](paper/main.tex). Protocol: [`docs/paper_claim.md`](docs/paper_claim.md).
 
-The Python package is still `eigenflow` (`pip install -e .` → `from eigenflow import SplineKAN`).
-
-`main` is the default (this note). `paper/kan-fourier-qkan` is the working branch.
+Installable package: `src` (`pip install -e .` → `from src import SplineKAN`).
 
 ## Install
 
@@ -25,9 +23,9 @@ pip install -e ".[dev]"
 
 ```python
 import jax
-from eigenflow import SplineKAN
-from eigenflow.datasets import make_dataset
-from eigenflow.training import train_model
+from src import SplineKAN
+from src.datasets import make_dataset
+from src.training import train_model
 
 key = jax.random.PRNGKey(0)
 k1, k2 = jax.random.split(key)
@@ -56,7 +54,7 @@ Sol walkthrough: [`docs/sol.md`](docs/sol.md). Merge shards with [`experiments/m
 ## Layout
 
 ```text
-eigenflow/     # Python package (mlp, spline_kan, fourier_kan, qkan, …)
+src/           # Python package (mlp, spline_kan, fourier_kan, qkan, …)
 docs/          # claim, stack, Sol, per-model notes
 experiments/   # run_benchmark.py, merge_results.py
 jobs/          # Sol CPU / A100 / GH200 arrays

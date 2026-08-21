@@ -406,7 +406,7 @@ class FeynmanDatasetGenerator:
         target_scaling: str = "standardize",
     ) -> Dict[str, jax.Array]:
         """Generate data and return a shuffled train/val/test dict."""
-        from eigenflow.datasets import train_val_test_split
+        from src.datasets import train_val_test_split
 
         k_data, k_split = jax.random.split(key)
         X, y, _ = self.generate(

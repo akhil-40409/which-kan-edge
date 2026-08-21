@@ -35,10 +35,10 @@ if str(ROOT) not in sys.path:
 
 import jax
 
-from eigenflow.datasets import FEYNMAN_EQUATIONS, SPECIAL_FUNCTIONS, make_dataset
-from eigenflow.layers import FourierKAN, MLP, QKAN, QNN, QuIRK, SplineKAN
-from eigenflow.training import train_model
-from eigenflow.utils.flops import estimate_flops
+from src.datasets import FEYNMAN_EQUATIONS, SPECIAL_FUNCTIONS, make_dataset
+from src.layers import FourierKAN, MLP, QKAN, QNN, QuIRK, SplineKAN
+from src.training import train_model
+from src.utils.flops import estimate_flops
 
 QUICK_TASKS = ["I.12.1", "j0"]
 DEFAULT_TASKS = ["I.12.1", "I.15.3t", "I.6.20a", "j0", "erf", "sinc"]

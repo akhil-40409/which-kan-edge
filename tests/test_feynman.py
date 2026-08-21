@@ -2,7 +2,7 @@ import jax
 import jax.numpy as jnp
 import pytest
 
-from eigenflow.datasets import (
+from src.datasets import (
     FEYNMAN_EQUATIONS,
     FeynmanDatasetGenerator,
     make_dataset,

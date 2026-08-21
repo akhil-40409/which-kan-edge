@@ -19,7 +19,7 @@ This follows the fairness protocol of Yu et al., [*KAN or MLP: A Fairer Comparis
 | Main | **QKAN** | SiLU residual + 1-qubit data-reuploading \(\langle Z\rangle\) (Jiang et al.) |
 | Sideline | **MLP** | Fixed SiLU on nodes |
 
-Code: [`eigenflow/layers/`](../eigenflow/layers/).
+Code: [`src/layers/`](../src/layers/).
 
 ## Experiment suites
 
@@ -56,9 +56,9 @@ python experiments/run_benchmark.py --suite paper --list-jobs
 
 | Metric | Source |
 |--------|--------|
-| `test_rmse` / `val_rmse` | Best-by-val checkpoint ([`train_model`](../eigenflow/training/__init__.py)) |
+| `test_rmse` / `val_rmse` | Best-by-val checkpoint ([`train_model`](../src/training/__init__.py)) |
 | `n_params` | Trainable scalars only (SplineKAN **excludes** frozen grids) |
-| `flops` | Analytic per-sample forward ([`eigenflow/utils/flops.py`](../eigenflow/utils/flops.py)) |
+| `flops` | Analytic per-sample forward ([`src/utils/flops.py`](../src/utils/flops.py)) |
 | `train_time_s` | Wall clock on Sol CPU/GPU |
 
 ## FLOPs conventions (Yu-style)

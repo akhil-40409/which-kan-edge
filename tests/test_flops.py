@@ -1,5 +1,5 @@
-from eigenflow.layers import FourierKAN, MLP, QKAN, SplineKAN
-from eigenflow.utils.flops import (
+from src.layers import FourierKAN, MLP, QKAN, SplineKAN
+from src.utils.flops import (
     estimate_flops,
     flops_fourier_kan,
     flops_mlp,
@@ -33,7 +33,7 @@ def test_spline_trainable_excludes_grids(key):
     state = model.init(key)
     params, grids = state
     n_train = trainable_param_count(model, state)
-    from eigenflow.utils.metrics import count_params
+    from src.utils.metrics import count_params
 
     assert n_train == count_params(params)
     assert n_train < count_params(state)

@@ -1,6 +1,6 @@
 """PennyLane device + QNode helpers (JAX interface, optional Catalyst qjit)."""
 
-from eigenflow.backends.qnode import (
+from src.backends.qnode import (
     CATALYST_DEVICES,
     make_device,
     make_qnode,

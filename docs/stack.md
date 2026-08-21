@@ -26,10 +26,10 @@ Optax training loop
 | **Catalyst** `@qjit` | Compile hybrid quantum+classical hot path                  | Optional (QNN)                                    |
 
 
-In eigenflow:
+In this repo:
 
 ```python
-from eigenflow import QNN, QKAN
+from src import QNN, QKAN
 
 # Multi-qubit QNN: live PennyLane QNode + JAX
 m = QNN(n_features=2, n_qubits=2, device="default.qubit", qjit=False)
@@ -60,6 +60,6 @@ PennyLane).
 
 1. Catalyst’s fast path wants **Lightning**, not `default.qubit`.
 2. Inside `@qjit`, prefer Catalyst transforms (`catalyst.grad`, …) for quantum-aware grads.
-3. Install Catalyst via `pip install 'eigenflow[catalyst]'`.
+3. Install Catalyst via `pip install -e '.[catalyst]'`.
 
-Code: `[eigenflow/backends/qnode.py](../eigenflow/backends/qnode.py)`.
+Code: `[src/backends/qnode.py](../src/backends/qnode.py)`.

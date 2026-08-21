@@ -52,7 +52,7 @@ def maybe_qjit(fn: Callable, *, qjit: bool) -> Callable:
     except ImportError as exc:  # pragma: no cover - depends on optional extra
         raise ValueError(
             "qjit=True requires the Catalyst package. "
-            "Install with: pip install 'eigenflow[catalyst]' "
+            "Install with: pip install -e '.[catalyst]' "
             "(or pip install pennylane-catalyst)."
         ) from exc
     return catalyst_qjit(fn)

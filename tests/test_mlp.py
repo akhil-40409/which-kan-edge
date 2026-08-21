@@ -2,8 +2,8 @@ import jax
 import jax.numpy as jnp
 import pytest
 
-from eigenflow.layers import MLP
-from eigenflow.utils import count_params
+from src.layers import MLP
+from src.utils import count_params
 
 
 def test_mlp_shapes_and_gradients(key, batch_key):

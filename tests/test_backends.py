@@ -3,7 +3,7 @@ import jax.numpy as jnp
 import pennylane as qml
 import pytest
 
-from eigenflow.backends import make_qnode, require_catalyst_device
+from src.backends import make_qnode, require_catalyst_device
 
 
 def test_make_qnode_jax_interface():

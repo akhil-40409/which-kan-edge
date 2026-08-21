@@ -1,8 +1,8 @@
 import jax
 import jax.numpy as jnp
 
-from eigenflow.layers import FourierKAN
-from eigenflow.utils import count_params, estimate_flops
+from src.layers import FourierKAN
+from src.utils import count_params, estimate_flops
 
 
 def test_fourier_kan_shapes_and_gradients(key, batch_key):

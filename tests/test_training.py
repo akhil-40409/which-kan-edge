@@ -1,9 +1,9 @@
 import jax
 import jax.numpy as jnp
 
-from eigenflow.datasets import make_dataset
-from eigenflow.layers import MLP
-from eigenflow.training import train_model
+from src.datasets import make_dataset
+from src.layers import MLP
+from src.training import train_model
 
 
 def test_train_mlp_decreases_and_returns_keys(key):

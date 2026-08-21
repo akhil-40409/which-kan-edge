@@ -9,8 +9,8 @@ import jax
 import jax.numpy as jnp
 import optax
 
-from eigenflow.utils.flops import estimate_flops, trainable_param_count
-from eigenflow.utils.metrics import rmse
+from src.utils.flops import estimate_flops, trainable_param_count
+from src.utils.metrics import rmse
 
 
 def train_model(

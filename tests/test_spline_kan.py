@@ -1,8 +1,8 @@
 import jax
 import jax.numpy as jnp
 
-from eigenflow.layers import SplineKAN, compute_b_splines
-from eigenflow.utils import count_params
+from src.layers import SplineKAN, compute_b_splines
+from src.utils import count_params
 
 
 def test_spline_kan_shapes_and_gradients(key, batch_key):

@@ -7,8 +7,8 @@ from typing import Dict, Optional, Tuple
 import jax
 import jax.numpy as jnp
 
-from eigenflow.datasets.feynman import FEYNMAN_EQUATIONS, FeynmanDatasetGenerator
-from eigenflow.datasets.special import SPECIAL_FUNCTIONS, SpecialFunctionGenerator
+from src.datasets.feynman import FEYNMAN_EQUATIONS, FeynmanDatasetGenerator
+from src.datasets.special import SPECIAL_FUNCTIONS, SpecialFunctionGenerator
 
 
 def train_val_test_split(

@@ -1,8 +1,8 @@
 import jax
 import jax.numpy as jnp
 
-from eigenflow.layers import QuIRK
-from eigenflow.utils import count_params
+from src.layers import QuIRK
+from src.utils import count_params
 
 
 def test_quirk_shapes_and_gradients(key, batch_key):

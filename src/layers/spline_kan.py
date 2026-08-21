@@ -177,7 +177,7 @@ class SplineKAN:
 
     def count_trainable_params(self, state: SplineKANState) -> int:
         """Exclude frozen knot grids from the parameter count."""
-        from eigenflow.utils.metrics import count_params
+        from src.utils.metrics import count_params
 
         params, _grids = state
         return count_params(params)

@@ -10,10 +10,10 @@ Hidden activations default to **SiLU**. Weights use Xavier/Glorot uniform init.
 
 ## Code
 
-[`eigenflow/layers/mlp.py`](../eigenflow/layers/mlp.py)
+[`src/layers/mlp.py`](../src/layers/mlp.py)
 
 ```python
-from eigenflow import MLP
+from src import MLP
 model = MLP([3, 64, 64, 1])
 params = model.init(key)
 y = model.apply(params, x)

@@ -1,7 +1,7 @@
 import jax
 import jax.numpy as jnp
 
-from eigenflow.datasets import SPECIAL_FUNCTIONS, SpecialFunctionGenerator, make_dataset
+from src.datasets import SPECIAL_FUNCTIONS, SpecialFunctionGenerator, make_dataset
 
 
 def test_all_specials_finite(key):
