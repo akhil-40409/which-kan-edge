@@ -10,19 +10,13 @@ Paper skeleton: [`paper/main.tex`](paper/main.tex). Protocol: [`docs/paper_claim
 
 The Python package is still `eigenflow` (`pip install -e .` → `from eigenflow import SplineKAN`).
 
-## Branches
-
-| Branch | Contents |
-|--------|----------|
-| `main` | Library only (no paper draft or fair/paper suites) |
-| `paper/kan-fourier-qkan` | This work: FourierKAN, FLOPs, Sol jobs, paper skeleton |
+`main` is the default (this note). `paper/kan-fourier-qkan` is the working branch.
 
 ## Install
 
 ```bash
 git clone https://github.com/akhil-40409/which-kan-edge.git
 cd which-kan-edge
-git checkout paper/kan-fourier-qkan
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ```
